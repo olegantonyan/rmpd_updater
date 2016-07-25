@@ -5,11 +5,12 @@ import time
 import sys
 import logging
 import optparse
-import traceback
 import signal
 import os
 
 import config
+import update
+import backup
 
 
 def signal_handler(signum, frame):
@@ -42,9 +43,10 @@ def bootstrap(configfile):
 
 
 def app():
+    upd = update.Update()
     while True:
         try:
-            pass
+            upd.check()
         except:
             logging.exception('unhandled exception in main thread')
         time.sleep(21)

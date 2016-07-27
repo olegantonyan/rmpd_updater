@@ -2,7 +2,6 @@
 
 import logging
 import os
-import shutil
 
 import config
 import archive

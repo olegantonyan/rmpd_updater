@@ -8,6 +8,7 @@ import config
 import backup
 import archive
 import shell
+import rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -52,23 +53,24 @@ class Update(object):
             pass
 
     def _update(self, filename):
-        try:
-            log.info('starting update from %s', filename)
-            if not self._backup.run():
-                raise Exception('error running backup before update')
-            self._write_statefile(self._processing_state_text())
-            if not archive.Archive(True).extract(os.path.join(os.getcwd(), filename), self._install_path):
-                raise Exception('update extract error')
-            log.info('update finished, rebooting')
-            self._reboot()
-        except:
-            log.exception('error running update')
-            log.error('restore most recent backup')
-            if self._backup.restore_most_recent():
-                log.info('recent backup restore successful')
-                self._remove_statefile()
-            else:
-                log.error('error restoring most recent backup')
+        with rw_fs.RwFs():
+            try:
+                log.info('starting update from %s', filename)
+                if not self._backup.run():
+                    raise Exception('error running backup before update')
+                self._write_statefile(self._processing_state_text())
+                if not archive.Archive(True).extract(os.path.join(os.getcwd(), filename), self._install_path):
+                    raise Exception('update extract error')
+                log.info('update finished, rebooting')
+                self._reboot()
+            except:
+                log.exception('error running update')
+                log.error('restore most recent backup')
+                if self._backup.restore_most_recent():
+                    log.info('recent backup restore successful')
+                    self._remove_statefile()
+                else:
+                    log.error('error restoring most recent backup')
 
     def _wait_processing(self):
         log.info('update state processing, wait couple minutes')

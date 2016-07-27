@@ -1,6 +1,5 @@
 [main]
 rmpd_client_path = /home/rmpd/rmpd_client
-statefile = rmpd_update
 
 [logging]
 logfile = /var/log/rmpd/updater.log

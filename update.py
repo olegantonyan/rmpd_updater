@@ -17,7 +17,7 @@ class Update(object):
     def __init__(self):
         self._install_path = config.Config().rmpd_client_path()
         self._backup = backup.Backup()
-        self._statefile = config.Config().statefile()
+        self._statefile = 'rmpd_update_statefile'
 
     def run(self, filename):
         log.info('starting software update from %s', filename)

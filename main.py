@@ -10,7 +10,6 @@ import os
 
 import config
 import update
-import backup
 
 
 def signal_handler(signum, frame):
@@ -47,6 +46,8 @@ def app():
     while True:
         try:
             upd.check()
+        except KeyboardInterrupt:
+            return 0
         except:
             logging.exception('unhandled exception in main thread')
         time.sleep(21)

@@ -3,10 +3,10 @@
 import logging
 import os
 import shutil
-import importlib.machinery
 
 import config
 import archive
+import rmpd_client
 
 log = logging.getLogger(__name__)
 
@@ -17,22 +17,19 @@ class Backup(object):
 
     def run(self):
         backup_filename = '{prefix}{version}.tar.gz'.format(prefix=self._backup_file_prefix(), version=self._read_version())
-        temp_destination_filepath = os.path.join('/tmp', backup_filename)
-        log.info('starting backup "%s" to "%s"', self._install_path, temp_destination_filepath)
-        if not archive.Archive().compress(self._install_path, temp_destination_filepath):
+        destination_filepath = self._final_destination(backup_filename)
+        log.info('starting backup "%s" to "%s"', self._install_path, destination_filepath)
+        if not archive.Archive().compress(self._install_path, destination_filepath):
             log.error('error running backup')
             return False
-        final_destination = self._final_destination(backup_filename)
-        try:
-            shutil.move(temp_destination_filepath, final_destination)
-        except:
-            log.exception('error moving backup file after successful backup')
-            return False
-        log.info('backup successfully finished, the file stored in %s', final_destination)
+        log.info('backup successfully finished, the file stored in %s', destination_filepath)
         return True
 
     def restore(self, file):
-        pass
+        if not archive.Archive(True).extract(file, self._install_path):
+            log.error('error restoring backup %s', file)
+            return False
+        return True
 
     def restore_most_recent(self):
         file = self.most_recent_backup()
@@ -60,8 +57,7 @@ class Backup(object):
         return os.path.join(self.backup_storage_dir(), file)
 
     def _read_version(self):
-        module = importlib.machinery.SourceFileLoader('module.name', os.path.join(self._install_path, 'version.py')).load_module()
-        return module.VERSION
+        return rmpd_client.RmpdClient().version(self._install_path)
 
 
 

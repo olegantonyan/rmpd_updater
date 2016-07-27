@@ -1,8 +1,8 @@
 [main]
-rmpd_client_path = /home/oleg/projects/rmpd_client
+rmpd_client_path = /home/rmpd/rmpd_client
 statefile = rmpd_update
 
 [logging]
-logfile = /home/oleg/projects/tmp/updater.log
+logfile = /var/log/rmpd/updater.log
 verbose = no
 

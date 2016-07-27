@@ -1,0 +1,13 @@
+[Unit]
+Description=rmpd updater
+Wants=
+
+[Service]
+ExecStart=/usr/bin/python3 /home/rmpd/rmpd_updater/main.py -c /home/rmpd/rmpd_updater/updater.conf
+User=rmpd
+WorkingDirectory=/var/lib/rmpd/
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target

@@ -52,14 +52,14 @@ class Update(object):
         except FileNotFoundError:
             pass
 
-    def _update(self, filename):
+    def _update(self, filepath):
         with rw_fs.RwFs():
             try:
-                log.info('starting update from %s', filename)
+                log.info('starting update from %s', filepath)
                 if not self._backup.run():
                     raise Exception('error running backup before update')
                 self._write_statefile(self._processing_state_text())
-                if not archive.Archive(True).extract(os.path.join(os.getcwd(), filename), self._install_path):
+                if not archive.Archive(True).extract(filepath, self._install_path):
                     raise Exception('update extract error')
                 log.info('update finished, rebooting')
                 self._reboot()
@@ -71,6 +71,7 @@ class Update(object):
                     self._remove_statefile()
                 else:
                     log.error('error restoring most recent backup')
+                    self._write_statefile(self._rollback_state_text())
 
     def _wait_processing(self):
         log.info('update state processing, wait couple minutes')
@@ -86,6 +87,9 @@ class Update(object):
 
     def _processing_state_text(self):
         return '-PROCESSING-'
+
+    def _rollback_state_text(self):
+        return '-ROLLBACK-'
 
     def _reboot(self):
         return shell.execute('sudo reboot')

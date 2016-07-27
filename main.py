@@ -10,6 +10,7 @@ import os
 
 import config
 import update
+import version
 
 
 def signal_handler(signum, frame):
@@ -30,7 +31,7 @@ def setup_logger():
     formatter = logging.Formatter("[%(asctime)s] %(name)s |%(levelname)s| %(message)s", "%Y-%m-%d %H:%M:%S")
     child_logger.setFormatter(formatter)
     root_logger.addHandler(child_logger)
-    logging.info("started")
+    logging.info("started (version %s)", version.VERSION)
 
 
 def bootstrap(configfile):

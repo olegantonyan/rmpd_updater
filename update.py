@@ -53,25 +53,28 @@ class Update(object):
             pass
 
     def _update(self, filepath):
+        log.info('starting update from %s', filepath)
+        if not os.path.exists(filepath):
+            log.error('file %s does not exists', filepath)
+            self._remove_statefile()
+            return
         with rw_fs.RwFs():
+            if not self._backup.run():
+                log.error('error running backup before update')
+                return
+            self._write_statefile(self._processing_state_text())
             try:
-                log.info('starting update from %s', filepath)
-                if not self._backup.run():
-                    raise Exception('error running backup before update')
-                self._write_statefile(self._processing_state_text())
                 if not archive.Archive(True).extract(filepath, self._install_path):
                     raise Exception('update extract error')
-                log.info('update finished, rebooting')
-                self._reboot()
             except:
-                log.exception('error running update')
-                log.error('restore most recent backup')
+                log.exception('error extracting update, restore most recent backup')
                 if self._backup.restore_most_recent():
                     log.info('recent backup restore successful')
-                    self._remove_statefile()
                 else:
                     log.error('error restoring most recent backup')
-                    self._write_statefile(self._rollback_state_text())
+                self._write_statefile(self._rollback_state_text())
+            log.info('update finished, rebooting')
+        self._reboot()
 
     def _wait_processing(self):
         log.info('update state processing, wait couple minutes')
@@ -79,7 +82,8 @@ class Update(object):
         if self._read_statefile() is not None:  # the statefile should be deleted by rmpd_client
             log.info('update state is still processing, something whent wrong, rollback')
             if self._backup.restore_most_recent():
-                self._remove_statefile()
+                self._write_statefile(self._rollback_state_text())
+                self._reboot()
             else:
                 log.error('error restoring most recent backup')
         else:
@@ -93,10 +97,6 @@ class Update(object):
 
     def _reboot(self):
         return shell.execute('sudo reboot')
-
-
-
-
 
 
 

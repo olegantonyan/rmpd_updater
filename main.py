@@ -37,7 +37,10 @@ def setup_logger():
 def bootstrap(configfile):
     config.Config().set_configfile(configfile)
     setup_logger()
-    logging.info("using config file: '{c}'".format(c=configfile))
+    if os.path.exists(configfile):
+        logging.info("using config file: '{c}'".format(c=configfile))
+    else:
+        logging.info("using default config")
     logging.info("working directory: '{w}'".format(w=os.getcwd()))
     signal.signal(signal.SIGTERM, signal_handler)
 
@@ -63,7 +66,7 @@ def main():
 
     if opts.workingdir:
         os.chdir(opts.workingdir)
-    bootstrap(opts.configfile if opts.configfile else "updater.conf")
+    bootstrap(opts.configfile)
     sys.exit(app())
 
 if __name__ == '__main__':

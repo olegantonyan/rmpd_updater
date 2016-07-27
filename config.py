@@ -49,8 +49,9 @@ class Config(object, metaclass=singleton.Singleton):
 
     def _parse(self):
         self._parser = configparser.ConfigParser()
-        with codecs.open(self._filename, 'r', encoding='utf-8') as f:
-            self._parser.read_file(f)
+        if self._filename and os.path.exists(self._filename):
+            with codecs.open(self._filename, 'r', encoding='utf-8') as f:
+                self._parser.read_file(f)
 
         section = 'logging'
         self._logfile = self._parser.get(section, 'logfile', fallback='/var/log/rmpd/updater.log')

@@ -52,6 +52,8 @@ def app():
             upd.check()
         except KeyboardInterrupt:
             return 0
+        except SystemExit:
+            return 0
         except:
             logging.exception('unhandled exception in main thread')
         time.sleep(21)

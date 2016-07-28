@@ -83,11 +83,12 @@ class Update(object):
         time.sleep(180)  # wait a minute or two, after this timeout rollback
         if self._read_statefile() is not None:  # the statefile should be deleted by rmpd_client
             log.info('update state is still processing, something whent wrong, rollback')
-            if self._backup.restore_most_recent():
-                self._write_statefile(self._rollback_state_text())
-                self._reboot()
-            else:
-                log.error('error restoring most recent backup')
+            with rw_fs.RwFs():
+                if self._backup.restore_most_recent():
+                    self._write_statefile(self._rollback_state_text())
+                    self._reboot()
+                else:
+                    log.error('error restoring most recent backup')
         else:
             log.info('update seems to be successful')
 

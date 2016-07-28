@@ -37,7 +37,7 @@ def setup_logger():
 def bootstrap(configfile):
     config.Config().set_configfile(configfile)
     setup_logger()
-    if os.path.exists(configfile):
+    if configfile and os.path.exists(configfile):
         logging.info("using config file: '{c}'".format(c=configfile))
     else:
         logging.info("using default config")

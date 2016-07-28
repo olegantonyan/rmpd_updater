@@ -7,18 +7,6 @@ import os
 import singleton
 
 
-class ConfigFileNotSpecifiedError(RuntimeError):
-    pass
-
-
-def _guard_initialization(func):
-    def wrap(self, *args):
-        if self._parser is None or self._filename is None:
-            raise ConfigFileNotSpecifiedError("you have to specify config file with 'set_configfile()' method")
-        return func(self, *args)
-    return wrap
-
-
 class Config(object, metaclass=singleton.Singleton):
     def __init__(self):
         self._filename = None
@@ -28,19 +16,12 @@ class Config(object, metaclass=singleton.Singleton):
         self._filename = filename
         self._parse()
 
-    @_guard_initialization
     def rmpd_client_path(self):
         return self._rmpd_client_path
 
-    @_guard_initialization
     def logfile(self):
         return self._logfile
 
-    @_guard_initialization
-    def verbose_logging(self):
-        return self._boolean_attr(self._verbose)
-
-    @_guard_initialization
     def verbose_logging(self):
         return self._boolean_attr(self._verbose)
 

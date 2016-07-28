@@ -75,8 +75,6 @@ class Update(object):
                 self._write_statefile(self._rollback_state_text())
             log.info('update finished, rebooting')
         self._reboot()
-        while True:
-            time.sleep(1)
 
     def _wait_processing(self):
         log.info('update state processing, wait couple minutes')
@@ -100,7 +98,9 @@ class Update(object):
 
     def _reboot(self):
         shell.execute('sync')
-        return shell.execute('sudo reboot')
+        shell.execute('sudo reboot')
+        while True:
+            time.sleep(1)
 
 
 

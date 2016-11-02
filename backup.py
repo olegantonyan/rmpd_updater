@@ -6,6 +6,7 @@ import os
 import config
 import archive
 import rmpd_client
+import files
 
 log = logging.getLogger(__name__)
 
@@ -39,15 +40,14 @@ class Backup(object):
 
     def backup_storage_dir(self):
         directory = os.path.join(os.getcwd(), 'backups')
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        files.mkdir(directory)
         return directory
 
     def most_recent_backup(self):
-        files = [f for f in os.listdir(self.backup_storage_dir()) if f.startswith(self._backup_file_prefix())]
-        if len(files) == 0:
+        fls = [f for f in os.listdir(self.backup_storage_dir()) if f.startswith(self._backup_file_prefix())]
+        if len(fls) == 0:
             return None
-        return self._final_destination(max(files, key=lambda f: os.path.getctime(self._final_destination(f))))
+        return self._final_destination(max(fls, key=lambda f: os.path.getctime(self._final_destination(f))))
 
     def _backup_file_prefix(self):
         return 'backup-rmpd-client-'

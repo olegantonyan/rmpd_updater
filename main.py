@@ -11,6 +11,7 @@ import os
 import config
 import update
 import version
+import files
 
 
 def signal_handler(signum, frame):
@@ -20,6 +21,9 @@ def signal_handler(signum, frame):
 
 
 def setup_logger():
+    logfile = config.Config().logfile()
+    logdir = os.path.dirname(logfile)
+    files.mkdir(logdir)
     logging.basicConfig(filename=config.Config().logfile(),
                         format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",

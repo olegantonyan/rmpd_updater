@@ -4,6 +4,7 @@
 import time
 import sys
 import logging
+import logging.handlers
 import optparse
 import signal
 import os
@@ -14,7 +15,7 @@ import version
 import files
 
 
-def signal_handler(signum, frame):
+def signal_handler(signum, _):
     logging.info("caught signal {s}".format(s=signum))
     logging.warning("terminated")
     sys.exit(0)
@@ -22,18 +23,15 @@ def signal_handler(signum, frame):
 
 def setup_logger():
     logfile = config.Config().logfile()
-    logdir = os.path.dirname(logfile)
-    files.mkdir(logdir)
-    logging.basicConfig(filename=config.Config().logfile(),
-                        format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
-                        datefmt="%Y-%m-%d %H:%M:%S",
-                        level=(logging.DEBUG if config.Config().verbose_logging() else logging.INFO))
-
+    files.mkdir(os.path.dirname(logfile))
     root_logger = logging.getLogger()
+    rotating_handler = logging.handlers.RotatingFileHandler(logfile, maxBytes=2097152, backupCount=5)
+    root_logger.setLevel(logging.DEBUG if (config.Config().verbose_logging()) else logging.INFO)
     child_logger = logging.StreamHandler(sys.stdout)
-    child_logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("[%(asctime)s] %(name)s |%(levelname)s| %(message)s", "%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter("[%(asctime)s] %(name)s[%(threadName)s/%(thread)d] |%(levelname)s| %(message)s", "%Y-%m-%d %H:%M:%S")
     child_logger.setFormatter(formatter)
+    rotating_handler.setFormatter(formatter)
+    root_logger.addHandler(rotating_handler)
     root_logger.addHandler(child_logger)
     logging.info("started (version %s)", version.VERSION)
 

@@ -61,6 +61,8 @@ class Update(object):
                 try:
                     if not archive.Archive(True).extract(filepath, self._install_path):
                         raise Exception('update extract error')
+                    log.info('installing new dependencies')
+                    self._install_dependencies()
                 except:
                     log.exception('error extracting update, restore most recent backup')
                     if self._backup.restore_most_recent():
@@ -79,6 +81,11 @@ class Update(object):
             with rw_fs.Root():
                 if self._backup.restore_most_recent():
                     self._write_statefile(self._rollback_state_text())
+                    try:
+                        log.info('restoring old dependencies')
+                        self._install_dependencies()
+                    except:
+                        log.exception('error restoring old dependencies, but cannot do anything with this')
                     self._reboot()
                 else:
                     log.error('error restoring most recent backup')
@@ -97,5 +104,7 @@ class Update(object):
         while True:
             time.sleep(1)
 
-
-
+    def _install_dependencies(self):
+        (r, o, e) = shell.execute('sudo pip3 install -r {path}/requirements.txt'.format(path=self._install_path))
+        if r != 0:
+            raise Exception('{e}\n{o}'.format(e=e, o=o))
